@@ -24,8 +24,7 @@ RUN apt-get update && \
       lizardfs-chunkserver \
       lizardfs-cgiserv \
       lizardfs-adm \
-      lizardfs-client \
-      man && \
+      lizardfs-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -35,12 +34,8 @@ RUN groupmod -g 9421 mfs
 
 #### LIZARDFS MASTER CONFIG ####
 
-# Create empty metadata file
-RUN cp /var/lib/mfs/metadata.mfs.empty /var/lib/mfs/metadata.mfs
-
-# LizardFS data volume
-# This *must* come after copying the empty metadata file
-VOLUME /var/lib/mfs
+# Copy empty metadata file to a spot that will not be overwritten by a volume
+RUN cp /var/lib/mfs/metadata.mfs.empty /metadata.mfs.empty
 
 # Setup mfsmaster.cfg
 ## Default to a master

@@ -2,6 +2,11 @@
 
 # Configure LizardFS master
 if [ "$1" = "master" ]; then
+    # Copy the empty metadata file to /var/lib/mfs if it does not exist
+    if [ ! -e /var/lib/mfs/metadata.mfs ]; then
+        cp /metadata.mfs.empty /var/lib/mfs/metadata.mfs
+    fi
+
     # Add config for mfsmaster.cfg
     # For each vairable that starts with `MFSMASTER_`, remove the
     # prefix and add the value to the `mfsmaster.cfg` file.
@@ -80,3 +85,6 @@ elif [ "$1" = "chunkserver" ]; then
         fi
     done
 fi
+
+# Ensure proper ownership of the /var/lib/mfs directory
+chown -R mfs:mfs /var/lib/mfs

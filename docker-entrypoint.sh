@@ -34,7 +34,7 @@ elif [ "$1" = "client" ]; then
     mfsmount $mountpoint ${@:3}
     if [ $? -eq 0 ]; then
         trap "echo 'Termination signal caught: Unmounting and exiting.'; umount $mountpoint; exit \$?" SIGTERM SIGINT
-        while true; do :; done
+        while true; do sleep 1; done
     else
         exit 1
     fi
