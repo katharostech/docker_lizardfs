@@ -1,0 +1,85 @@
+version: '3.5'
+services:
+  mfsmaster-1:
+    image: katharostech/lizardfs
+    command: master ha master
+    restart: on-failure
+    networks:
+      - hostnet
+    environment:
+      MFSMASTER_PERSONALITY: ha-cluster-managed
+      MFSMASTER_ADMIN_PASSWORD: password
+      MFSMASTER_MASTER_HOST: 192.168.0.100
+      MFSMASTER_MATOML_LISTEN_PORT: 9419
+      MFSMASTER_MATOCS_LISTEN_PORT: 9420
+      MFSMASTER_MATOCL_LISTEN_PORT: 9421
+      MFSMASTER_MATOTS_LISTEN_PORT: 9424
+      LIZARDFS_URAFT_URAFT_NODE_ADDRESS: localhost:9420
+      LIZARDFS_URAFT_URAFT_NODE_ADDRESS: localhost:9520
+      LIZARDFS_URAFT_URAFT_NODE_ADDRESS: localhost:9620
+      LIZARDFS_URAFT_URAFT_ID: 0
+      LIZARDFS_URAFT_URAFT_FLOATING_IP: 192.168.0.100
+      LIZARDFS_URAFT_URAFT_FLOATING_NETMASK: 255.255.255.0
+      LIZARDFS_URAFT_URAFT_FLOATING_IFACE: eth0
+    volumes:
+      - /var/lib/mfs
+  metalogger:
+    image: katharostech/lizardfs
+    command: metalogger
+    restart: on-failure
+    networks:
+      - hostnet
+    environment:
+      MFSMETALOGGER_MASTER_HOST: 192.268.0.100
+    volumes:
+      - /var/lib/mfs
+  chunkserver:
+    image: katharostech/lizardfs
+    command: chunkserver
+    restart: on-failure
+    networks:
+      - hostnet
+    environment:
+      # This lets you run the chunkserver with less available disk space
+      MFSCHUNKSERVER_HDD_LEAVE_SPACE_DEFAULT: 20Mi # 4Gi is the default
+      MFSCHUNKSERVER_MASTER_HOST: 192.168.0.100
+      MFSHDD_1: /mnt/mfshdd
+    volumes:
+      - /mnt/mfshdd
+  cgiserver:
+    image: katharostech/lizardfs
+    command: cgiserver
+    restart: on-failure
+    networks:
+      - hostnet
+  client1:
+    image: katharostech/lizardfs
+    command: client /mnt/mfs
+    restart: on-failure
+    networks:
+      - hostnet
+    # Required permissions and devices for container to mount filesystem
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor:unconfined
+  client2:
+    image: katharostech/lizardfs
+    command: client /mnt/mfs -H 192.168.99.100
+    restart: on-failure
+    networks:
+      - hostnet
+    # Required permissions and devices for container to mount filesystem
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor:unconfined
+
+networks:
+  hostnet:
+    external: true
+    name: host

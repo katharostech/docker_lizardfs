@@ -17,6 +17,25 @@ if [ "$1" = "master" ]; then
         echo "${config_name} = ${!var}" >> /etc/mfs/mfsmaster.cfg
     done
 
+    if [ "$2" = "ha" ]; then
+        # Add lines for lizardfs-uraft.cfg
+        # For each variable that starts with `LIZARDFS_URAFT_`, add the value
+        # to `lizardfs-uraft.cfg` file.
+        rm -f /etc/mfs/lizardfs-uraft.cfg # We remove the config file to reset config
+        configs=${!LIZARDFS_URAFT_*}
+        for var in $configs; do
+            config_name=${var#*_*_}
+
+            if [ `echo $config_name | grep 'URAFT_NODE_ADDRESS_[0-9]*'` ]; then
+                # Allow setting multiple values for URAFT_NODE_ADRESS
+                echo "URAFT_NODE_ADDRESS = ${!var}" >> /etc/mfs/lizardfs-uraft.cfg
+            else
+                # For all other settings just set the value normally
+                echo "${config_name} = ${!var}" >> /etc/mfs/lizardfs-uraft.cfg
+            fi
+        done
+    fi
+
     # Add lines for mfsexports.cfg
     # For each variable that starts with `MFSEXPORTS_`, add the value
     # to `mfsexports.cfg` file.

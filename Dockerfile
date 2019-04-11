@@ -2,31 +2,33 @@ FROM ubuntu:16.04
 
 # Install wget and busybox ( for vi )
 RUN apt-get update && \
-    apt-get install -y busybox gettext-base wget && \
+    apt-get install -y busybox wget unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Alias to busybox for vi
 RUN echo 'alias vi="busybox vi"' >> /root/.bashrc
 
-# Install LizardFS Key
-RUN wget -O - http://packages.lizardfs.com/lizardfs.key | apt-key add -
-
-# Add apt repositories
-RUN echo "deb http://packages.lizardfs.com/ubuntu/xenial xenial main" > /etc/apt/sources.list.d/lizardfs.list && \
-    echo "deb-src http://packages.lizardfs.com/ubuntu/xenial xenial main" >> /etc/apt/sources.list.d/lizardfs.list
-
-# Install LizardFS packages
-RUN apt-get update && \
+# Install LizardFS from the release candidate 1.13-rc1
+RUN set -x && \
+    wget -qO /tmp/lizardfs.tar https://lizardfs.com/wp-content/uploads/2018/07/lizardfs-bundle-Ubuntu-16.04.tar && \
+    wget -qO /tmp/fuse3.zip https://lizardfs.com/wp-content/uploads/2018/07/FUSE3-Ubuntu-16.04.zip && \
+    cd /tmp && \
+    tar -xf lizardfs.tar && \
+    unzip fuse3.zip && \
+    apt-get update && \
     apt-get install -y \
-      lizardfs-master \
-      lizardfs-metalogger \
-      lizardfs-chunkserver \
-      lizardfs-cgiserv \
-      lizardfs-adm \
-      lizardfs-client && \
+      ./ubuntu16/*fuse*.deb \
+      ./lizardfs*/lizardfs-adm*.deb \
+      ./lizardfs*/lizardfs-cgiserv*.deb \
+      ./lizardfs*/lizardfs-chunkserver*.deb \
+      ./lizardfs*/lizardfs-client*.deb \
+      ./lizardfs*/lizardfs-master*.deb \
+      ./lizardfs*/lizardfs-metalogger*.deb \
+      ./lizardfs*/lizardfs-uraft*.deb && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf lizardfs* ubuntu16 lizardfs.tar fuse3.zip
 
 # Ensure the `mfs` user and group has a consistent uid/gid
 RUN usermod -u 9421 mfs

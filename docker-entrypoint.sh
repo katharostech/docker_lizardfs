@@ -1,15 +1,23 @@
 #!/bin/bash
 
+if [ $DEBUG = "true" ]; then set -x; fi
+
 usage_message="usage: docker run kadimasolutions/lizardfs [master|metalogger|chunkserver|cgiserver|client]"
 
 # Configure LizardFS
 if [ ! "$SKIP_CONFIGURE" = "true" ]; then
-    /configure.sh $1
+    /configure.sh $@
 fi
 
 if [ "$1" = "master" ]; then
+    extra_options=""
+    if [ "$2" = "ha" ]; then
+        echo "Starting uRaft"
+        lizardfs-uraft -d
+        extra_options="-o ha-cluster-managed -o initial-personality=${3-master}"
+    fi
     echo "Starting LizardFS master"
-    exec mfsmaster -d
+    exec mfsmaster $extra_options -d
 
 elif [ "$1" = "metalogger" ]; then
     echo "Starting LizardFS Metalogger"
@@ -21,7 +29,7 @@ elif [ "$1" = "chunkserver" ]; then
 
 elif [ "$1" = "cgiserver" ]; then
     echo "Starting LizardFS CGI Server"
-    exec lizardfs-cgiserver -v -P 80
+    exec lizardfs-cgiserver -v -P ${2-80}
 
 elif [ "$1" = "client" ]; then
     if [ "$2" = "--help" -o "$2" = "-h" ]; then
