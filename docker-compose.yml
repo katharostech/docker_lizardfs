@@ -1,13 +1,13 @@
 version: '3'
 services:
   mfsmaster:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: master
     restart: on-failure
     volumes:
       - /var/lib/mfs
   mfsmaster-shadow:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: master
     restart: on-failure
     environment:
@@ -15,13 +15,13 @@ services:
     volumes:
       - /var/lib/mfs
   metalogger:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: metalogger
     restart: on-failure
     volumes:
       - /var/lib/mfs
   chunkserver:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: chunkserver
     restart: on-failure
     environment:
@@ -31,13 +31,13 @@ services:
     volumes:
       - /mnt/mfshdd
   cgiserver:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: cgiserver
     restart: on-failure
     ports:
       - 8080:80
   client1:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: client /mnt/mfs
     restart: on-failure
     # Required permissions and devices for container to mount filesystem
@@ -48,7 +48,7 @@ services:
     security_opt:
       - apparmor:unconfined
   client2:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: client /mnt/mfs
     restart: on-failure
     # Required permissions and devices for container to mount filesystem
