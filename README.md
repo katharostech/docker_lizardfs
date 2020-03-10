@@ -11,10 +11,10 @@ The same Docker image is used to run each different kind of LizardFS service: `m
 version: '3'
 services:
   mfsmaster:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: master
   metalogger:
-    image: kadimasolutions/lizardfs
+    image: katharostech/lizardfs
     command: metalogger
 ...
 ```
@@ -22,7 +22,7 @@ services:
 Or on the commandline:
 
 ```bash
-$ docker run -d --name mfsmaster kadimasolutions/lizardfs master
+$ docker run -d --name mfsmaster katharostech/lizardfs master
 ```
 
 ### Services
@@ -33,21 +33,25 @@ The `master`, `metalogger`, and `chunkserver` services are configured using envi
 
 #### CGI Server
 
-The `cgiserver` service does not require configuration. It starts a webserver inside the container running on port `80`. If the `master` service is running with a different name than `mfsmaster` you will have to put the host in the url when you access the CGI server: `http://192.168.99.100/mfs.cgi?materhost=192.168.99.100`.
+The `cgiserver` service does not require configuration. It starts a webserver inside the container running on port `80`. When accessing the web UI you will have to put the master host ( and port as well, if it is not `9421` ) in the url when you access the CGI server: `http://192.168.99.100:8080/mfs.cgi?masterhost=mfsmaster&masterport=19421`.
+
+If you would, for any reason, like to change the port that the CGI server is running on *inside* the container, you can specify the port after `cgiserver` in the Docker command. For example:
+
+    docker run -d --name cgiserver katharostech/lizardfs cgiserver 8080
 
 #### Client
 
 You can run the container with the `client` command and it will look for and connect to the `mfsmaster` and mount the filesystem into the container at `/mnt/mfs`. You can change which path the filesystem is mounted to by passing it in after `client`. The container will also need to be run as privileged and linked to the master container. For example:
 
 ```bash
-$ docker run -d --name mymaster kadimasolutions/lizardfs master
-$ docker run -d --name myclient --link mymaster:mfsmaster --privileged kadimasolutions/lizardfs client /mnt/my-alternate-moutpoint
+$ docker run -d --name mymaster katharostech/lizardfs master
+$ docker run -d --name myclient --link mymaster:mfsmaster --privileged katharostech/lizardfs client /mnt/my-alternate-moutpoint
 ```
 
 All arguments passed in after `client` and the moutpoint will be passed directly to the `mfsmount` command. You can see all available options with `--help`.
 
 ```bash
-$ docker run --privileged kadimasolutions/lizardfs client --help
+$ docker run --privileged katharostech/lizardfs client --help
 ```
 
 After the client has connected, you can access the LizardFS filesystem by `exec`ing into the container.
@@ -119,7 +123,7 @@ If you would instead prefer to mount in configuration files, you can disable con
 The [mfsmaster.cfg](https://docs.lizardfs.com/man/mfsmaster.cfg.5.html) file is the primary config file for the LizardFS master. It is made up of a list of key-value pairs that are explained in the [documentation](https://docs.lizardfs.com/man/mfsmaster.cfg.5.html). You can add any key-value pair to the `mfsmaster.cfg` file by adding an environment variable in the format of `MFSMASTER_KEY_NAME=value`. For example, if you wanted to run a LizardFS shadow master you could do the following:
 
 ```bash
-$ docker run -d --name shadow -e MFSMASTER_PERSONALITY=shadow kadimasolutions/lizardfs
+$ docker run -d --name shadow -e MFSMASTER_PERSONALITY=shadow katharostech/lizardfs
 ```
 
 This you can do for any key-value pairs you want to add to the `mfsmaster.cfg` file.
