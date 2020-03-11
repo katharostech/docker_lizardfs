@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $DEBUG = "true" ]; then set -x; fi
+if [ "$DEBUG" = "true" ]; then set -x; fi
 
 usage_message="usage: docker run kadimasolutions/lizardfs [master|metalogger|chunkserver|cgiserver|client]"
 
@@ -29,6 +29,13 @@ elif [ "$1" = "chunkserver" ]; then
 
 elif [ "$1" = "cgiserver" ]; then
     echo "Starting LizardFS CGI Server"
+    
+    if [ "$MASTER_HOST" != "" ]; then
+        # Proxy localhost:9421 to the actual master and port so that you don't have to add
+        # the master host and port to the query string.
+        ncat --sh-exec "ncat $MASTER_HOST ${MASTER_PORT:-9421}" -l 9421 --keep-open > /dev/null 2>&1 &
+    fi
+
     exec lizardfs-cgiserver -v -P ${2-80}
 
 elif [ "$1" = "client" ]; then

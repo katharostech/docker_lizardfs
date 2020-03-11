@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Install wget and busybox ( for vi )
 RUN apt-get update && \
-    apt-get install -y busybox wget unzip && \
+    apt-get install -y busybox nmap unzip wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

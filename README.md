@@ -33,7 +33,7 @@ The `master`, `metalogger`, and `chunkserver` services are configured using envi
 
 #### CGI Server
 
-The `cgiserver` service does not require configuration. It starts a webserver inside the container running on port `80`. When accessing the web UI you will have to put the master host ( and port as well, if it is not `9421` ) in the url when you access the CGI server: `http://192.168.99.100:8080/mfs.cgi?masterhost=mfsmaster&masterport=19421`.
+The CGI Server, by default, starts a webserver inside the container running on port `80`. You can set the `MASTER_HOST` and `MASTER_PORT` environment variables and the container will proxy the internal port 9421 to that master host and port. The web UI will then, by default, connect to that internal proxy when connecting to the master. Alternatively, when accessing the web UI you can put the master host ( and port as well, if it is not `9421` ) in the url: `http://192.168.99.100:8080/mfs.cgi?masterhost=mfsmaster&masterport=19421`.
 
 If you would, for any reason, like to change the port that the CGI server is running on *inside* the container, you can specify the port after `cgiserver` in the Docker command. For example:
 
